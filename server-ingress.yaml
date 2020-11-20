@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+  namespace: ingress-nginx
+data: 
+  943: "dev/vpn:943" 
+  9443: "dev/vpn:9443"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: udp-services
+  namespace: ingress-nginx
+data: 
+  1194: "dev/vpn:1194"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-databases
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/component: controller
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  loadBalancerSourceRanges:
+  - <your-ip-address-will-whitelisted> # 
+  ports:                                                     
+    - name: uiadmin
+      port: 943
+      targetPort: 943
+      protocol: TCP                                                     
+    - name: ui
+      port: 9443
+      targetPort: 9443
+      protocol: TCP                                                     
+    - name: vpn
+      port: 1194
+      targetPort: 1194
+      protocol: TCP                                                  
+  selector:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/component: controller
+ # EDITOR=nano kubectl edit deployment -n ingress-nginx   ingress-nginx-controller
+ ## Add this after - /nginx-ingress-controller for both tcp and udp exposing from ingress
+ # - --tcp-services-configmap=ingress-nginx/tcp-services
+ # - --udp-services-configmap=ingress-nginx/udp-services
+ #
