@@ -16,7 +16,7 @@ After that with server.yaml you can deploy your open vpn server on your kubernet
 
 Now after waiting 1-2 minutes you must be able to reach access server ui on https://(loadbalancer OR ingress-ip):943/admin.<br>
   
-Default username password is admin:password on openvpn.You can create user(in his example without authentication so you should check the allow autologin checkbox.) from ui.Logout and login from user page(https://(loadbalancer OR ingress-ip):943).So you can download and use your .ovpn certificate.<br>
+Default username password is admin:password on openvpn.You can create user(in his example without authentication so you should check the allow autologin checkbox.) from ui.Also you should add load balancer or ingress public ip to openvpn for accessing.So go to network settings and add your public ip to HOSTNAME OR IP section instead of pod internal ip.Logout and login from user page(https://(loadbalancer OR ingress-ip):943).So you can download and use your .ovpn certificate.<br>
 
 For using on desktop you must download and install [openvpn-gui](https://openvpn.net/client-connect-vpn-for-windows/) and import your certificate it.After that you can reach your pod network from your desktop.<br>
 
