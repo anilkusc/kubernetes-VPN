@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vpn
+spec:
+  clusterIP: None
+  selector:
+    app: vpn
+  ports:
+    - protocol: TCP
+      port: 943
+      targetPort: 943
+      name: uiadmin
+    - protocol: TCP
+      port: 9443
+      targetPort: 9443
+      name: ui
+    - protocol: UDP
+      port: 1194
+      targetPort: 1194
+      name: vpn
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpn
+  labels:
+    app: vpn
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vpn
+  template:
+    metadata:
+      labels:
+        app: vpn
+    spec:
+      containers:
+      - name: vpn
+        image: ghcr.io/linuxserver/openvpn-as #you can use another openvpn server
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+        env:
+        - name: TZ
+          value: "Europe/Istanbul"
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        ports:
+        - containerPort: 943
+          name: uiadmin
+        - containerPort: 9443
+          name: ui
+        - containerPort: 1194
+          name: vpn
+          protocol: UDP
