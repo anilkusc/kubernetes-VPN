@@ -25,4 +25,4 @@ For reaching a VPN server from kubernetes pod network:<br>
 Copy inside of your .ovpn(client.ovpn) file and paste it to client.yaml's ovpn config map.
 Apply client.yaml.You should replace 2. container as your own container that will be use VPN.
 ``kubectl apply -f client.yaml``
-> :warning: **This is not battle tested yet!Think twice before use it in production.**
+> :warning: **This repo purposed a Poc so it is not battle tested yet!Think twice before use it in production.**
