@@ -1,0 +1,78 @@
+kind: ConfigMap
+metadata:
+  name: route-script
+apiVersion: v1
+data:
+  route-override.sh: |-
+     #!/bin/sh
+     set -e
+     VPN_GATEWAY=$(route -n | awk 'NR==3' | awk '{ print $2 }')
+     ip route del 0.0.0.0/1 via $VPN_GATEWAY
+     echo "Route Updated"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openvpn-client
+spec:
+  selector:
+    matchLabels:
+      app: openvpn-client
+      vpn: vpn-id
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: openvpn-client
+        vpn: vpn-id
+    spec:
+      volumes:
+        - name: vpn-config
+          configMap:
+            name: ovpn
+        - name: route-script
+          configMap:
+            name: route-script
+            defaultMode: 477
+        - name: tmp
+          emptyDir: {}
+      containers:
+        - name: vpn
+          image: dperson/openvpn-client
+          command: ["/bin/sh","-c"]
+          args: ["openvpn --config 'vpn/client.ovpn' --script-security 3 --route-up /tmp/route-override.sh;"]
+          stdin: true
+          tty: true
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+          env:
+            - name: TZ
+              value: "Europe/Istanbul"
+          volumeMounts:
+            - name: vpn-config
+              mountPath: /vpn/client.ovpn
+              subPath: client.ovpn
+            - name: route-script
+              mountPath: /tmp/route-override.sh
+              subPath: route-override.sh
+        - name: app1 
+          image: python:3.6-stretch # you can use whatever you want as container.It will use VPN network for connecting remote servers.
+          command:
+            - sleep
+            - "100000"
+          tty: true
+#      dnsConfig:
+#        nameservers:
+#          - 8.8.8.8
+#          - 8.8.4.4
+---
+kind: ConfigMap
+metadata:
+  name: ovpn
+apiVersion: v1
+data:
+  client.ovpn: |-
+    <your-.ovpn-certificate>
